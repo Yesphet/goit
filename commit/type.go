@@ -12,6 +12,8 @@ const (
 	TypeChore
 )
 
+var Types = []Type{TypeFeat, TypeFix, TypeDocs, TypeStyle, TypeRefactor, TypeTest, TypeChore}
+
 func (t Type) Describe() string {
 	switch t {
 	case TypeFeat:
