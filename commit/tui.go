@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-const retPrefix = "  "
+const (
+	retPrefix      = "  "
+	scopeSeparator = ","
+)
 
 func CreateMessageFromTUI() (*Message, error) {
 	app := TUIApplication{
@@ -18,6 +21,7 @@ func CreateMessageFromTUI() (*Message, error) {
 			SelectedHintTextColor: tcell.ColorGreen,
 			RetTextColor:          tcell.ColorBlue,
 		},
+		autoScopeList: []string{"a1", "a2", "a11", "a12", "b1", "b2"},
 	}
 	app.Start()
 	return nil, nil
@@ -35,6 +39,8 @@ type TUIApplication struct {
 	layout   *tview.Flex
 	msg      *Message
 	style    TUIStyleConfig
+
+	autoScopeList []string
 }
 
 func (app *TUIApplication) Start() error {
@@ -107,8 +113,30 @@ func (app *TUIApplication) selectType(nextFlex *tview.Flex) *tview.Flex {
 	return flex
 }
 
+func (app *TUIApplication) scopeAutocompleteFunc(currentText string) []string {
+	scopes := strings.Split(currentText, scopeSeparator)
+	semiWord := scopes[len(scopes)-1]
+	entries := make([]string, 0)
+loop:
+	for _, defined := range app.autoScopeList {
+		if strings.HasPrefix(defined, semiWord) {
+			for i := 0; i < len(scopes)-1; i++ {
+				if scopes[i] == defined {
+					continue loop
+				}
+			}
+			prefix := ""
+			if len(scopes) > 1 {
+				prefix = strings.Join(scopes[:len(scopes)-1], ",") + ","
+			}
+			entries = append(entries, prefix+defined)
+		}
+	}
+	return entries
+}
+
 func (app *TUIApplication) denoteScope(nextFlex *tview.Flex) *tview.Flex {
-	hintText := "Denote the scope of this change, use commas to separate multiple scopes:"
+	hintText := "Denote the scope of this change, use commas(,) to separate multiple scopes:"
 	hintTextView := tview.NewTextView().
 		SetTextColor(app.style.HintTextColor).
 		SetText("? " + hintText)
@@ -119,8 +147,8 @@ func (app *TUIApplication) denoteScope(nextFlex *tview.Flex) *tview.Flex {
 	input := tview.NewInputField().
 		SetFieldBackgroundColor(tcell.ColorBlack).
 		SetFieldTextColor(tcell.ColorWhite).
-		SetLabel(retPrefix)
-	input.SetInputCapture(ignoreUpAndDownInputCapture)
+		SetLabel(retPrefix).
+		SetAutocompleteFunc(app.scopeAutocompleteFunc)
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -133,7 +161,9 @@ func (app *TUIApplication) denoteScope(nextFlex *tview.Flex) *tview.Flex {
 		retTexView.SetText(retPrefix + input.GetText())
 		flex.RemoveItem(input).
 			AddItem(retTexView, 0, 1, false)
-		app.msg.Scope = strings.Split(input.GetText(), ",")
+		if input.GetText() != ""{
+			app.msg.Scope = strings.Split(input.GetText(), scopeSeparator)
+		}
 		app.foldCurrentAndDrawNextFlex(flex, nextFlex)
 	})
 	return flex
