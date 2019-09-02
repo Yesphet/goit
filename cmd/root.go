@@ -27,7 +27,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "goit",
 	Short: "A brief description of your application",
-	Long:  `Goit is a simple tool for writing standard git commit message by terminal user interface,and generage change log by commit log with one button. `,
+	Long:  `Goit is a simple tool for writing standard git commit message by terminal user interface,and generate change log by commit log with one button. `,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -40,10 +40,7 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.goit.yaml)")
+
 
 	rootCmd.AddCommand(genCzCommand())
 }

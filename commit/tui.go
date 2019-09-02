@@ -5,6 +5,7 @@ import (
 	"github.com/gdamore/tcell"
 	"fmt"
 	"strings"
+	"github.com/Yesphet/goit/config"
 )
 
 const (
@@ -38,7 +39,7 @@ func CreateMessageFromTUI() (*Message, error) {
 			SelectedHintTextColor: tcell.ColorGreen,
 			RetTextColor:          tcell.ColorBlue,
 		},
-		autoScopeList: []string{"a1", "a2", "a11", "a12", "b1", "b2"},
+		autoScopeList: config.Global.Commit.Scopes,
 	}
 	err := app.Start()
 	if err != nil {
