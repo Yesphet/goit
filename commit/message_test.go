@@ -23,6 +23,18 @@ Close #234`
 	assert.EqualValues(t, expect, msg.Format())
 }
 
+func TestMessage_Format_OnlyHeader(t *testing.T) {
+	msg := &Message{
+		Type:    TypeFeat,
+		Scope:   []string{"plugins"},
+		Subject: "Add new plugin xxx",
+	}
+
+	expect := `feat(plugins): Add new plugin xxx`
+	fmt.Println(msg.Format())
+	assert.EqualValues(t, expect, msg.Format())
+}
+
 func TestMessage_Format_WithoutBody(t *testing.T) {
 	msg := &Message{
 		Type:    TypeFeat,
@@ -32,8 +44,6 @@ func TestMessage_Format_WithoutBody(t *testing.T) {
 	}
 
 	expect := `feat(plugins): Add new plugin xxx
-
-Add new plugin xxx, it ...........
 
 Close #234`
 	fmt.Println(msg.Format())

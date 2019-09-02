@@ -12,6 +12,23 @@ const (
 	scopeSeparator = ","
 )
 
+func Do() error {
+	gh, err := newGitHelper()
+	if err != nil {
+		return err
+	}
+
+	if err := gh.gitCommitPreCheck(); err != nil {
+		return err
+	}
+	msg, err := CreateMessageFromTUI()
+	if err != nil {
+		return err
+	}
+
+	return gh.gitCommit(msg.Format())
+}
+
 func CreateMessageFromTUI() (*Message, error) {
 	app := TUIApplication{
 		msg: &Message{},
@@ -23,8 +40,11 @@ func CreateMessageFromTUI() (*Message, error) {
 		},
 		autoScopeList: []string{"a1", "a2", "a11", "a12", "b1", "b2"},
 	}
-	app.Start()
-	return nil, nil
+	err := app.Start()
+	if err != nil {
+		return nil, err
+	}
+	return app.msg, nil
 }
 
 type TUIStyleConfig struct {
@@ -161,7 +181,7 @@ func (app *TUIApplication) denoteScope(nextFlex *tview.Flex) *tview.Flex {
 		retTexView.SetText(retPrefix + input.GetText())
 		flex.RemoveItem(input).
 			AddItem(retTexView, 0, 1, false)
-		if input.GetText() != ""{
+		if input.GetText() != "" {
 			app.msg.Scope = strings.Split(input.GetText(), scopeSeparator)
 		}
 		app.foldCurrentAndDrawNextFlex(flex, nextFlex)
@@ -202,9 +222,41 @@ func (app *TUIApplication) commonWriteFlex(hintText string, nextFlex *tview.Flex
 
 func (app *TUIApplication) writeSubject(nextFlex *tview.Flex) *tview.Flex {
 	hintText := "Write a short, imperative and present tense description of the change:"
-	return app.commonWriteFlex(hintText, nextFlex, func(inputText string) {
-		app.msg.Subject = inputText
+	hintTextView := tview.NewTextView().
+		SetTextColor(app.style.HintTextColor).
+		SetText("? " + hintText)
+
+	retTexView := tview.NewTextView().
+		SetTextColor(app.style.RetTextColor)
+
+	input := tview.NewInputField().
+		SetFieldBackgroundColor(tcell.ColorBlack).
+		SetFieldTextColor(tcell.ColorWhite).
+		SetLabel(retPrefix)
+	emptyInputValidateInputCapture := func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEnter && input.GetText() == "" {
+			hintTextView.SetText("? Short description can't be empty").SetTextColor(tcell.ColorRed)
+			return nil
+		}
+		return event
+	}
+	input.SetInputCapture(multiInputCapture(ignoreUpAndDownInputCapture, emptyInputValidateInputCapture))
+
+	flex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(hintTextView, 1, 1, false).
+		AddItem(input, 0, 2, true)
+
+	input.SetFinishedFunc(func(key tcell.Key) {
+		hintTextView.SetText("√ " + hintText)
+		hintTextView.SetTextColor(app.style.SelectedHintTextColor)
+		retTexView.SetText(retPrefix + input.GetText())
+		flex.RemoveItem(input).
+			AddItem(retTexView, 0, 1, false)
+		app.msg.Subject = input.GetText()
+		app.foldCurrentAndDrawNextFlex(flex, nextFlex)
 	})
+	return flex
 }
 
 func (app *TUIApplication) writeBody(nextFlex *tview.Flex) *tview.Flex {
@@ -219,7 +271,6 @@ func (app *TUIApplication) writeFooter() *tview.Flex {
 	return app.commonWriteFlex(hintText, nil, func(inputText string) {
 		app.msg.Footer = inputText
 		app.tviewApp.Stop()
-		fmt.Println(app.msg.Format())
 	})
 }
 
@@ -231,5 +282,15 @@ func ignoreUpAndDownInputCapture(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	default:
 		return event
+	}
+}
+
+func multiInputCapture(captures ...func(event *tcell.EventKey) *tcell.EventKey) func(event *tcell.EventKey) *tcell.EventKey {
+	return func(event *tcell.EventKey) *tcell.EventKey {
+		input := event
+		for _, capture := range captures {
+			input = capture(input)
+		}
+		return input
 	}
 }

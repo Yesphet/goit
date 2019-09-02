@@ -15,7 +15,7 @@ type Message struct {
 
 func (msg *Message) Format() string {
 	scope := ""
-	if msg.Scope != nil && len(msg.Scope) != 0 {
+	if msg.Scope != nil && len(msg.Scope) != 0 && strings.Join(msg.Scope, "") != "" {
 		scope = "(" + strings.Join(msg.Scope, ",") + ")"
 	}
 
