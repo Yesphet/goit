@@ -1,6 +1,7 @@
 package commit
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Yesphet/goit/config"
@@ -8,9 +9,14 @@ import (
 	"github.com/rivo/tview"
 )
 
+type appStatus int8
+
 const (
 	retPrefix      = "  "
 	scopeSeparator = ","
+
+	appStatusBegin appStatus = iota
+	appStatusDone
 )
 
 func Do() error {
@@ -56,11 +62,11 @@ type TUIStyleConfig struct {
 }
 
 type TUIApplication struct {
-	tviewApp *tview.Application
-	layout   *tview.Flex
-	msg      *Message
-	style    TUIStyleConfig
-
+	tviewApp      *tview.Application
+	layout        *tview.Flex
+	msg           *Message
+	style         TUIStyleConfig
+	status        appStatus
 	autoScopeList []string
 }
 
@@ -74,10 +80,14 @@ func (app *TUIApplication) Start() error {
 	writeSubjectFlex := app.writeSubject(writeBodyFlex)
 	denoteScopeFlex := app.denoteScope(writeSubjectFlex)
 	selectTypeFlex := app.selectType(denoteScopeFlex)
-
 	app.layout.AddItem(selectTypeFlex, 0, 1, true)
+
+	app.status = appStatusBegin
 	if err := app.tviewApp.SetRoot(app.layout, true).Run(); err != nil {
 		return err
+	}
+	if app.status != appStatusDone {
+		return fmt.Errorf("interrupt")
 	}
 	return nil
 }
@@ -271,6 +281,7 @@ func (app *TUIApplication) writeFooter() *tview.Flex {
 	hintText := "List any breaking changes or issues closed by this change:"
 	return app.commonWriteFlex(hintText, nil, func(inputText string) {
 		app.msg.Footer = inputText
+		app.status = appStatusDone
 		app.tviewApp.Stop()
 	})
 }
