@@ -1,0 +1,15 @@
+---
+version: 0.0.1
+commit:
+# Set scopes here, and it will autocomplete by these scopes when you do commit.
+  scopes: ["commit"]
+
+# Disable default type list, include [feat,fix,test,docs,style,refactor,build,chore].
+# Default is false.
+  disable_default_types: false
+
+# Specify your custom change type.
+# Use format: - "$name: $description"
+#  types:
+#    - feat: new feature
+#    - bug: bug fix

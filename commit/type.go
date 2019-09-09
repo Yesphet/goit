@@ -2,6 +2,7 @@ package commit
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Yesphet/goit/config"
@@ -16,6 +17,21 @@ var Types []Type
 var TypeUnknown = Type{Name: "unknown", Description: "Unknown"}
 
 func init() {
+	if !config.Global.Commit.DisableDefaultTypes {
+		addDefaultTypes()
+	}
+
+	for _, s := range config.Global.Commit.Types {
+		AddCustomType(s)
+	}
+
+	if len(Types) == 0 {
+		fmt.Println("There has no types defined.")
+		os.Exit(1)
+	}
+}
+
+func addDefaultTypes() {
 	AddCustomType("feat: A new feature")
 	AddCustomType("fix: A bug fix")
 	AddCustomType("test: Adding missing tests or correcting existing tests")
@@ -24,10 +40,6 @@ func init() {
 	AddCustomType("refactor: A code change that neither fixes a bug nor adds a feature")
 	AddCustomType("build: Changes that affect the build system or external dependencies")
 	AddCustomType("chore: Tool changes, configuration changes, version releases, etc")
-
-	for _, s := range config.Global.Commit.Types {
-		AddCustomType(s)
-	}
 }
 
 func NewType(s string) Type {

@@ -15,20 +15,25 @@ type Config struct {
 }
 
 type Commit struct {
-	Scopes []string
-	Types  []string
+	Scopes              []string
+	Types               []string
+	DisableDefaultTypes bool `yaml:"disable_default_types"`
 }
 
 func init() {
 	Global = &Config{
 		Commit: Commit{
-			Scopes: make([]string, 0),
-			Types:  make([]string, 0),
+			Scopes:              make([]string, 0),
+			Types:               make([]string, 0),
+			DisableDefaultTypes: false,
 		},
 	}
-	path := "goit.yml"
+	path := "goit.yaml"
 
 	file, err := os.Open(path)
+	if err == os.ErrNotExist {
+		file, err = os.Open("goit.yml")
+	}
 	if err != nil {
 		return
 	}
