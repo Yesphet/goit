@@ -1,10 +1,11 @@
 package config
 
 import (
-	"os"
-	"io/ioutil"
-	"gopkg.in/yaml.v2"
 	"fmt"
+	"io/ioutil"
+	"os"
+
+	"gopkg.in/yaml.v2"
 )
 
 var Global *Config

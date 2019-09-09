@@ -19,7 +19,7 @@ func (msg *Message) Format() string {
 		scope = "(" + strings.Join(msg.Scope, ",") + ")"
 	}
 
-	header := fmt.Sprintf("%s%s: %s\n", msg.Type.Name(), scope, msg.Subject)
+	header := fmt.Sprintf("%s%s: %s\n", msg.Type.Name, scope, msg.Subject)
 
 	body := ""
 	if msg.Body != "" {

@@ -1,11 +1,11 @@
 package commit
 
 import (
-	"github.com/rivo/tview"
-	"github.com/gdamore/tcell"
-	"fmt"
 	"strings"
+
 	"github.com/Yesphet/goit/config"
+	"github.com/gdamore/tcell"
+	"github.com/rivo/tview"
 )
 
 const (
@@ -120,7 +120,7 @@ func (app *TUIApplication) selectType(nextFlex *tview.Flex) *tview.Flex {
 		return func() {
 			hintTextView.SetText("√ " + hintText)
 			hintTextView.SetTextColor(app.style.SelectedHintTextColor)
-			retTexView.SetText(fmt.Sprintf("  %-12s %s", t.Name()+":", t.Describe()))
+			retTexView.SetText("  " + t.String())
 			flex.RemoveItem(typeList).
 				AddItem(retTexView, 0, 1, false)
 			app.msg.Type = t
@@ -129,7 +129,7 @@ func (app *TUIApplication) selectType(nextFlex *tview.Flex) *tview.Flex {
 	}
 
 	for _, t := range Types {
-		typeList.AddItem(fmt.Sprintf("  %-12s %s", t.Name()+":", t.Describe()), "", 0, doneFunc(t))
+		typeList.AddItem("  "+t.String(), "", 0, doneFunc(t))
 	}
 	return flex
 }
