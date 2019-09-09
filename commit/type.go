@@ -3,6 +3,8 @@ package commit
 import (
 	"fmt"
 	"strings"
+
+	"github.com/Yesphet/goit/config"
 )
 
 type Type struct {
@@ -22,6 +24,10 @@ func init() {
 	AddCustomType("refactor: A code change that neither fixes a bug nor adds a feature")
 	AddCustomType("build: Changes that affect the build system or external dependencies")
 	AddCustomType("chore: Tool changes, configuration changes, version releases, etc")
+
+	for _, s := range config.Global.Commit.Types {
+		AddCustomType(s)
+	}
 }
 
 func NewType(s string) Type {
