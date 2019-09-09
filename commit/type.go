@@ -35,7 +35,7 @@ func NewType(s string) Type {
 	name := strings.TrimSpace(part[0])
 	desc := ""
 	if len(part) > 1 {
-		strings.TrimSpace(strings.Join(part[1:], ":"))
+		desc = strings.TrimSpace(strings.Join(part[1:], ":"))
 	}
 	return Type{
 		Name:        name,
