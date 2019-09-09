@@ -34,10 +34,10 @@ func init() {
 func addDefaultTypes() {
 	AddCustomType("feat: A new feature")
 	AddCustomType("fix: A bug fix")
+	AddCustomType("modify: A code change that neither fixes a bug nor adds a feature")
 	AddCustomType("test: Adding missing tests or correcting existing tests")
 	AddCustomType("docs: Documentation only changes")
 	AddCustomType("style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)")
-	AddCustomType("refactor: A code change that neither fixes a bug nor adds a feature")
 	AddCustomType("build: Changes that affect the build system or external dependencies")
 	AddCustomType("chore: Tool changes, configuration changes, version releases, etc")
 }
