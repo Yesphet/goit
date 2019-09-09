@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/Yesphet/goit/commit"
 	"fmt"
 	"os"
+
+	"github.com/Yesphet/goit/commit"
+	"github.com/spf13/cobra"
 )
 
 func genCzCommand() *cobra.Command {
@@ -23,7 +24,12 @@ func genCzCommand() *cobra.Command {
 
 func genReleaseCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "release",
+		Use:   "release",
+		Short: "release <patch|minor|major>",
+	}
+
+	cmd.Run = func(cmd *cobra.Command, args []string) {
+
 	}
 	return cmd
 }

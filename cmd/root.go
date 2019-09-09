@@ -40,7 +40,6 @@ func Execute() {
 }
 
 func init() {
-
-
 	rootCmd.AddCommand(genCzCommand())
+	rootCmd.AddCommand(genReleaseCommand())
 }
