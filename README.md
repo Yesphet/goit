@@ -16,7 +16,7 @@ go get -u github.com/Yesphet/goit
 
 #### 2. Configuration
 
-You can add `goit.yml` to any git repository.
+You can add `goit.yml` to any git repository.
 
 It's an example config: 
 
