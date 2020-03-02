@@ -34,5 +34,5 @@ commit:
 
 #### 2. Set up git alias
 
-Just run `git config --global alias.cz '!goit cz'`, then `cd` into any git repository and use `git cz` instead of git commit and you will find the commitizen prompt. 
+Just run `git config --global alias.cz '!goit cz'`, then `cd` into any git repository and use `git cz` instead of `git commit` and you will find the commitizen prompt. 
 

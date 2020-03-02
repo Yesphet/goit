@@ -1,14 +1,16 @@
 package commit
 
 import (
-	"gopkg.in/src-d/go-git.v4"
 	"fmt"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"time"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"io/ioutil"
+	"strings"
+	"time"
+
+	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/config"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 type gitHelper struct {
@@ -53,22 +55,67 @@ func getUserConfig(repo *git.Repository) (name, email string) {
 
 func readUserFromGlobalGitConfig() (name, email string) {
 	globalCfgPath := filepath.Join(os.Getenv("HOME"), ".gitconfig")
-	f, err := os.Open(globalCfgPath)
+	cfg, err := readConfig(globalCfgPath)
 	if err != nil {
 		return "", ""
+	}
+	readAndMergeIncludeIfConfig(cfg)
+	userSec := cfg.Raw.Section("user")
+	return userSec.Option("name"), userSec.Option("email")
+}
+
+func readAndMergeIncludeIfConfig(cfg *config.Config) {
+	includeSec := cfg.Raw.Section("includeIf")
+	if includeSec == nil {
+		return
+	}
+
+	pwd, _ := os.Getwd()
+	for _, sub := range includeSec.Subsections {
+		if !strings.HasPrefix(sub.Name, "gitdir:") {
+			continue
+		}
+		dir := strings.TrimLeft(sub.Name, "gitdir:")
+		if !pathMatch(pwd, dir) {
+			continue
+		}
+		path := sub.Option("path")
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(os.Getenv("HOME"), path)
+		}
+		include, err := readConfig(path)
+		if err == nil {
+			cfg.Raw.Sections = append(cfg.Raw.Sections, include.Raw.Sections...)
+		}
+	}
+}
+
+func readConfig(path string) (*config.Config, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
 	}
 	defer f.Close()
 	rawGlobalCfg, err := ioutil.ReadAll(f)
 	if err != nil {
-		return "", ""
+		return nil, err
 	}
 	cfg := config.NewConfig()
 	err = cfg.Unmarshal(rawGlobalCfg)
 	if err != nil {
-		return "", ""
+		return nil, err
 	}
-	userSec := cfg.Raw.Section("user")
-	return userSec.Option("name"), userSec.Option("email")
+	return cfg, nil
+}
+
+func pathMatch(path string, exp string) bool {
+	exp = strings.TrimRight(exp, "**")
+	if strings.HasPrefix(exp, "**/") {
+		exp = strings.TrimLeft(exp, "**/")
+		return strings.Contains(strings.ToLower(path), strings.ToLower(exp))
+	} else {
+		return strings.HasPrefix(strings.ToLower(path), strings.ToLower(exp))
+	}
 }
 
 func (gh *gitHelper) gitCommitPreCheck() error {
